@@ -175,17 +175,3 @@
 | 説明        | ag:description   | 0–N  | 文字列  |         | リソースに関する説明や他の属性で記述されない情報                                     | 選択的 |
 | 情報源       | ag:source        | 0–N  | 文字列  |         | メタデータの取得元となる情報源（e.g. 情報取得元のリソース、ウェブサイトなど）                    | 選択的 |
 | 管理注記      | ag:adminNote     | 0–N  | 文字列  |         | 資料管理上必要な注記。非公開項目。                                            | 選択的 |
-
-## データモデル
-
-
-![図. 2024年10月版](https://paper-attachments.dropboxusercontent.com/s_62AA676DAF577746F2B1F99592A31DA823F2472791E4108CADC775B44D196420_1729338855732_AGM.drawio.png)
-
-
-
-![図. 旧版](https://paper-attachments.dropbox.com/s_62AA676DAF577746F2B1F99592A31DA823F2472791E4108CADC775B44D196420_1625194430218_agdatamodel2.png)
-
-
-
-## オントロジー
-https://www.dropbox.com/s/slv88wv8en4brpc/ag210605.owl?dl=0

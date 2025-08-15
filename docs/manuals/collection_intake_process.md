@@ -81,8 +81,6 @@
 ## 画像変換フロー
 8. サムネイル作成のためのトリミングとダウンサイジング
 
-
-
 ----------
 https://www.dropbox.com/s/tjds9bkcjnxmwz5/Untitled%20Diagram%285%29.drawio?dl=0
 
@@ -104,19 +102,7 @@ https://www.a-one.co.jp/product/new/np_0701/31551.html
 
 ※印刷前に一度試し刷りしてみて適切に印刷されているか確認すること
 
-https://www.dropbox.com/s/uuk46piimz4scr2/A1-A3000.pdf?dl=0
-https://www.dropbox.com/s/x08m731e2l5lpbx/B1-B3000.pdf?dl=0
-https://www.dropbox.com/s/wp6hvmpubxlvten/C1-C1000.pdf?dl=0
-
-https://www.dropbox.com/s/3m5zbcqkpkodm5d/csv_A1-A3000.csv?dl=0
-https://www.dropbox.com/s/hltsmg9hc872r8v/csv_B1-B3000.csv?dl=0
-https://www.dropbox.com/s/exj5zumtig5v2y1/csv_C1-C3000.csv?dl=0
-
-https://www.dropbox.com/s/kad20isqy5ikpqo/20220609-31555.alym?dl=0
-
-https://www.dropbox.com/s/qbl536b19ay67hj/agmitems%20%281%29.csv?dl=0
-
-https://www.dropbox.com/s/7c7w4ubno78vple/%E3%80%90%E7%99%BA%E6%B3%A8%E6%9B%B8%E3%80%91%E5%88%A5%E8%A3%BDQR%E3%82%B3%E3%83%BC%E3%83%89%E3%82%AD%E3%83%BC%E3%83%91%E3%83%BC_20180116.pdf?dl=0
+[レポジトリの該当フォルダへのリンク](https://github.com/fukudakz/analoggamemuseum/tree/main/labels)
 
 ----------
 ![図. CSVImportによる一括登録（1）](https://paper-attachments.dropbox.com/s_2F2CE8DD697D63D56DBEBC966CB325DAA024C114E779C894C709BAC5E2CAB7A3_1633596081862_Screenshot+2021-10-07+at+17-40-30++++CSV++AGM.png)

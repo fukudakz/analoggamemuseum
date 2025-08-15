@@ -3,6 +3,7 @@
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](./CONTRIBUTING.md)
 
+
 ## 概要
 
 このリポジトリは、「アナログゲームミュージアム」プロジェクトの公式技術リポジトリです。アナログゲームという文化財を未来に継承するため、その保存と活用に必要な技術文書（メタデータスキーマ、保存環境基準、デジタル化仕様など）や、関連するソフトウェアを共同で開発・管理・公開します。
@@ -14,6 +15,9 @@
 * **標準化**: 世界中のアナログゲームを記録・保存するための、オープンで標準化された枠組みを構築します。
 * **共有**: 保存に関する知識や技術を集約し、誰もが利用できる形で共有します。
 * **協業**: コミュニティと連携し、持続可能な保存と活用のためのエコシステムを育みます。
+
+## GitHub Pages
+[TOP](https://fukudakz.github.io/analoggamemuseum/): docs/ に配置した各文書を静的ページで確認できます。 
 
 ---
 
@@ -55,9 +59,6 @@
 | `docs/`         | より閲覧しやすく整形された、プロジェクトの公式ドキュメントです。|
 
 ---
-
-## GitHub Pages
-[TOP](https://fukudakz.github.io/analoggamemuseum/): docs/ に配置した各文書を静的ページで確認できます。 
 
 ## 🤝 貢献方法 (How to Contribute)
 

@@ -15,13 +15,12 @@
         - Download result からCSV取得可能（下記ファイル）
         - xlookupなど使ってjoinする
 
-[インポート用サンプルファイル](docs/)
+[SPARQLクエリで生成するサンプルファイル](https://github.com/fukudakz/analoggamemuseum/blob/main/docs/assets/files/itemIDs.csv)
 
 - インポート用CSVは下記のような形式とする。
     - dcterms:title 画像のタイトル
     - url メディアのソース
     - resourceID AGMサーチのリソースの内部ID
-
 
     dcterms:title,url,itemID,resourceID
     b624-001_work.webp,https://analoggamemuseum.org/temp/b624-001_work.webp,b624,3917

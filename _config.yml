@@ -1,0 +1,8 @@
+# _config.yml の内容
+
+# 既存のテーマ設定（もしあれば）
+theme: jekyll-theme-minimal
+
+# ここから下を追加
+# headに追加するCSSファイルを指定
+head_css: "/assets/css/style.css"

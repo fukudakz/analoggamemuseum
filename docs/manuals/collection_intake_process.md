@@ -7,6 +7,7 @@
 ## 前提
 - 受け入れ資料の件数より多いラベル（QRコード）を準備する。
     - [下段](https://paper.dropbox.com/doc/--B8Aq9QNkgNG0NzdnvrgW61eJAg-uKq7h9WK2L0h0wjeRcHN7#:uid=199116048548337015981820&h2=%E3%83%A9%E3%83%99%E3%83%AB%E4%BB%95%E6%A7%98%E6%A1%88)に詳細あり
+
 ## インデックス作成フロー
 1. 受け入れ全資料へのラベル貼付
 - シュリンク、輪ゴム、付箋、シールは取り外す。
@@ -105,13 +106,3 @@ https://www.a-one.co.jp/product/new/np_0701/31551.html
 ----------
 ![図. CSVImportによる一括登録（1）](https://paper-attachments.dropbox.com/s_2F2CE8DD697D63D56DBEBC966CB325DAA024C114E779C894C709BAC5E2CAB7A3_1633596081862_Screenshot+2021-10-07+at+17-40-30++++CSV++AGM.png)
 ![図. CSVImportによる一括登録（2）](https://paper-attachments.dropbox.com/s_2F2CE8DD697D63D56DBEBC966CB325DAA024C114E779C894C709BAC5E2CAB7A3_1633596081881_Screenshot+2021-10-07+at+17-40-10++++CSV++AGM.png)
-
-----------
-## 課題
-- 配架
-    - 配架ルール・場所
-    - 配架順（一括で到着したものの順）
-- ラベル
-    - ラベルの仕様
-    - ラベルキーパーの購入・費用
-

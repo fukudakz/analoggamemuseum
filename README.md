@@ -17,7 +17,8 @@
 * **協業**: コミュニティと連携し、持続可能な保存と活用のためのエコシステムを育みます。
 
 ## GitHub Pages
-[TOP](https://fukudakz.github.io/analoggamemuseum/): docs/ に配置した各文書を静的ページで確認できます。 
+[TOP](https://fukudakz.github.io/analoggamemuseum/)
+    docs/ に配置した各文書を静的ページで確認できます。 
 
 ---
 
@@ -65,8 +66,8 @@
 
 このプロジェクトは皆様の貢献によって成り立っています。仕様の改善提案、誤字脱字の修正、新しいツールの開発など、あらゆる形の参加を歓迎します。
 
-1.  **議論への参加**: アイデアの提案や仕様に関する議論は、まず[**Issues**](https://github.com/your-username/your-repository/issues)で行います。お気軽に新しいIssueを立ててください。
-2.  **変更の提案**: ドキュメントの修正やコードの追加は、[**Pull Request**](https://github.com/your-username/your-repository/pulls)を通じて行います。
+1.  **議論への参加**: アイデアの提案や仕様に関する議論は、まず[**Issues**](https://github.com/fukudakz/analoggamemuseum/issues)で行います。お気軽に新しいIssueを立ててください。
+2.  **変更の提案**: ドキュメントの修正やコードの追加は、[**Pull Request**](https://github.com/fukudakz/analoggamemuseum/pulls)を通じて行います。
     1.  このリポジトリをForkします。
     2.  変更内容に応じたブランチを作成します (`feat/add-new-schema`, `fix/typo-in-docs`など)。
     3.  変更をコミットし、ご自身のForkにPushします。

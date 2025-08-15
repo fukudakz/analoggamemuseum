@@ -49,27 +49,12 @@
         - 複数人でデータを入力する場合、シート「統合用シート」の形式で、各々別のシートに入力し、作業終了後に統合する、という形で進める。複数人で同時に1つのシートを編集すると上書き・エラーが生じる可能性があるためである。
 2. 配架
     - 分類に基づき、可能な限りID順に配架する。
-## インデックスのAGMサーチへの登録フロー
-3. AGMサーチのインスタンスの登録用データ作成
-    - 登録済のインスタンスの書誌データからラベル・バーコード・URIのリストを取得する
-        - [取得クエリ](https://collection.rcgs.jp/sparql/#query=PREFIX%20dcterms%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E%0APREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0Aprefix%20ag%3A%20%3Chttps%3A%2F%2Fwww.analoggamemuseum.org%2Fontology%2F%3E%0ASELECT%20*%20WHERE%20%7B%0A%20%20%3Fs%20rdf%3Atype%20%3Ftype%20%3B%0A%20%20%20%20%20ag%3Abarcode%20%3Fbarcode%20%3B%0A%20%20%20%20%20dcterms%3Atitle%20%3Flabel%20.%0A%20%20FILTER(%3Ftype%20%3D%20ag%3ATableTopGame%20%7C%7C%20%3Ftype%20%3D%20ag%3AVolume)%0A%7D&endpoint=https%3A%2F%2Fdydra.com%2Ffukudakz%2Fagmsearchendpoint%2Fsparql&requestMethod=POST&tabTitle=Query%202&headers=%7B%7D&contentTypeConstruct=text%2Fturtle%2C*%2F*%3Bq%3D0.9&contentTypeSelect=application%2Fsparql-results%2Bjson%2C*%2F*%3Bq%3D0.9&outputFormat=table)
-    - 新しくインデックスに登録したリストに、上記のクエリで生成したリストを追加した上で、バーコードで同一資料を識別し、重複資料を同定する。
-    - 重複のない資料を登録用リソースとして抽出し、ラベル・バーコードの2項目からなる登録用csvファイル（.tsv か .ods でも可）を作成する。
-    - Omeka-Sの管理画面からCSV Importを用いて登録用csvで一括登録する
-4. 個別資料データの一括登録
-    - 1.で登録し採番されたインスタンスのOmeka SのIDと個別資料IDの対応表を作成し、AGMインデックスの「例示するインスタンス」の項目に対応するインスタンスのIDを記録する
-    - AGMインデックスから新規に登録する個別資料のリソースについて下記の項目で構成される登録用csv（tsvかodsでも良い）を出力する
-        - ラベル（dcterms:title）：識別子と同じデータとする
-        - 識別子（ag:identifier）：ラベルのID（「A87」など）とする
-        - 由来（ag:provenance）：記録した由来（誰から寄贈されたものか）
-        - 例示するインスタンス（ag:exemplarOf）：該当するインスタンスのID
-        - 登録日（ag:available）：AGMインデックスに登録した日付
-    - Omeka-Sの管理画面からCSV Importを用いて登録用csvで一括登録する
+
 ## 画像撮影フロー
-5. 撮影面にカラーチャートを上部に配置する
+1. 撮影面にカラーチャートを上部に配置する
     1. 可能であれば定規も配置する
-6. カラーチャートおよび端からXXXmm（要確認）の余白を開けて、垂直に配置する
-7. 撮影する面は、平面に折り畳める箱であるか否かで2種類に分岐する
+2. カラーチャートおよび端からXXXmm（要確認）の余白を開けて、垂直に配置する
+3. 撮影する面は、平面に折り畳める箱であるか否かで2種類に分岐する
     1. 平面に折り畳める箱の場合
         1. 表面（箱を折りたたまない状態）
         2. 表面（箱を折りたたんだ状態）
@@ -79,7 +64,7 @@
         2. 裏面
         3. 側面（側面に重要なメタデータがある場合のみ撮影する）
 ## 画像変換フロー
-8. サムネイル作成のためのトリミングとダウンサイジング
+1. サムネイル作成のためのトリミングとダウンサイジング
 
 ----------
 https://www.dropbox.com/s/tjds9bkcjnxmwz5/Untitled%20Diagram%285%29.drawio?dl=0

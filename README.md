@@ -52,9 +52,12 @@
 | `conservation/` | 温湿度、光、材質など、物理的な保存環境の基準を定めます。     |
 | `imaging/`      | ゲームをデジタル化する際の解像度、ファイル形式、命名規則などを定めます。 |
 | `src/`          | データ入力支援ツールや検索システムなどのソースコードを格納します。 |
-| `docs/`         | より閲覧しやすく整形された、プロジェクトの公式ドキュメントです。[静的ページ](https://fukudakz.github.io/analoggamemuseum/)で公開します。 |
+| `docs/`         | より閲覧しやすく整形された、プロジェクトの公式ドキュメントです。|
 
 ---
+
+## GitHub Pages
+[TOP](https://fukudakz.github.io/analoggamemuseum/): docs/ に配置した各文書を静的ページで確認できます。 
 
 ## 🤝 貢献方法 (How to Contribute)
 

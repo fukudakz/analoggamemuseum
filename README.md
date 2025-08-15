@@ -36,6 +36,7 @@
 │       ├── view/
 │       ├── theme.ini
 │       └── ... (その他のテーマ関連ファイル)
+│   └── agm_index_to_import_csv/        \# AGMインデックスからAGMサーチへのデータ変換
 ├── discussion/       \# 議論の記録や議事録
 ├── examples/         \# スキーマやコードの具体例
 ├── .gitignore        \# Gitの追跡除外設定

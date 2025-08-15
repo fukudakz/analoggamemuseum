@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "total_records": 4544,
+    "processed_date": "2025-07-20T17:21:43.847401",
+    "source_file": "agm_index.csv"
+  },
+  "statistics": {
+    "categories": {
+      "テーブルトップゲーム": 4169,
+      "冊子": 369,
+      "インスタンス": 2
+    },
+    "barcode_coverage": 0.24713908450704225,
+    "individual_id_coverage": 0.9997799295774648,
+    "agm_instance_coverage": 0.8470510563380281
+  },
+  "data_quality": {
+    "missing_required_fields": {
+      "No.": 4,
+      "種別": 4,
+      "ラベル": 0
+    },
+    "duplicate_numbers": 5
+  }
+}

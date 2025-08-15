@@ -1,0 +1,34 @@
+<?php
+$translate = $this->plugin('translate');
+/*
+$searchType = $this->siteSetting('search_type', 'sitewide');
+switch ($searchType) {
+    case 'cross-site':
+        $searchAction = $this->url('site/cross-site-search', ['action' => 'results'], true);
+        break;
+    case 'sitewide':
+    default:
+        $searchAction = $this->url('site/resource', ['controller' => 'index', 'action' => 'search'], true);
+}
+*/
+$searchValue = $this->escapeHtml($this->params()->fromQuery('fulltext_search', ''));
+?>
+<!--
+<form action="<?php echo $this->escapeHtml($searchAction); ?>" id="search-form">
+    <input type="text" name="fulltext_search" value="<?php echo $searchValue; ?>"
+        placeholder="<?php echo $translate('名前やデザイナーなどでキーワード検索...'); ?>"
+        aria-label="<?php echo $translate('名前やデザイナーなどでキーワード検索...'); ?>">
+    <button type="submit"><?php echo $translate('Search'); ?></button>
+</form>
+-->
+<form
+    action="<?php echo $this->escapeHtml($this->url('site/resource', ['controller' => 'item','action' => 'browse'], true)); ?>"
+    id="search-form" class="mb-0 input-group">
+    <input type="text" name="property[0][text]" class="form-control"
+        value="<?php echo $searchValue; ?>"
+        placeholder="<?php echo $translate('ゲームタイトルや作者名などで検索...'); ?>">
+    <input type="hidden" name="property[0][joiner]" value="and" />
+    <input type="hidden" name="property[0][property]" value="" />
+    <input type="hidden" name="property[0][type]" value="in" />
+    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+</form>

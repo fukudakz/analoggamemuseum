@@ -1,0 +1,470 @@
+<?php
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'item resource browse analog-game-museum');
+
+$query = $this->params()->fromQuery();
+$itemSetShow = isset($itemSet);
+if ($itemSetShow):
+    $this->htmlElement('body')->appendAttribute('class', 'item-set');
+    $query['item_set_id'] = $itemSet->id();
+endif;
+$sortHeadings = [
+    [
+        'label' => $translate('Title'),
+        'value' => 'dcterms:title'
+    ],
+    [
+        'label' => $translate('Class'),
+        'value' => 'resource_class_label'
+    ],
+    [
+        'label' => '公開日',
+        'value' => 'ag:datePublished'
+    ],
+    [
+        'label' => $translate('Created'),
+        'value' => 'created'
+    ],
+];
+?>
+
+<!-- メインコンテンツ -->
+<main class="container">
+    <?php if ($itemSetShow): ?>
+        <?php echo $this->pageTitle($itemSet->displayTitle(), 2); ?>
+        <h3><?php echo $translate('Item set'); ?></h3>
+        <div class="metadata">
+            <?php echo $itemSet->displayValues(); ?>
+        </div>
+        <div class="item-set-items">
+        <?php echo '<h3>' . $escape($translate('Items')) . '</h3>'; ?>
+    <?php else: ?>
+        <?php echo $this->pageTitle($translate('Items'), 2); ?>
+    <?php endif; ?>
+
+    <!-- 検索結果 -->
+    <div class="main-content">
+        <!-- サイドバー（フィルター） -->
+        <aside class="sidebar">
+            <div class="filter-section">
+                <div class="filter-heading">
+                    <span><?php echo $translate('絞り込み条件'); ?></span>
+                    <button class="filter-toggle" onclick="clearAllFilters()"><?php echo $translate('すべてクリア'); ?></button>
+                </div>
+                
+                <?php echo $this->searchFilters(); ?>
+            </div>
+        </aside>
+        
+        <!-- 検索結果一覧 -->
+        <div class="results-container">
+            <div class="result-stats">
+                <span class="result-count"><?php echo count($items); ?> 件の結果</span>
+                <div class="result-sort">
+                    <span class="sort-label"><?php echo $translate('並び替え:'); ?></span>
+                    <?php echo $this->sortSelector($sortHeadings); ?>
+                    <div class="view-toggle">
+                        <button class="view-button active" id="grid-view">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                            </svg>
+                        </button>
+                        <button class="view-button" id="list-view">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="3" y="3" width="18" height="4" rx="1"></rect>
+                                <rect x="3" y="10" width="18" height="4" rx="1"></rect>
+                                <rect x="3" y="17" width="18" height="4" rx="1"></rect>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <?php $this->trigger('view.browse.before'); ?>
+            
+            <!-- 結果カードグリッド -->
+            <div class="result-grid">
+                <?php foreach ($items as $item): 
+                    $headingTerm = $this->siteSetting('browse_heading_property_term');
+                    $bodyTerm = $this->siteSetting('browse_body_property_term');
+                    $heading = $headingTerm ? $item->value($headingTerm, ['default' => $translate('[Untitled]')]) : $item->displayTitle();
+                    $body = $bodyTerm ? $item->value($bodyTerm) : $item->displayDescription();
+                    
+                    $className = $item->resourceClass() ? $item->resourceClass()->label() : '';
+                    $classNameEn = '';
+                    $classIcon = '';
+                    
+                    switch($className) {
+                        case "テーブルトップゲーム":
+                            $classNameEn = "tabletopgame";
+                            $classIcon = "o-icon-chess-rook";
+                            break;
+                        case "個人":
+                            $classNameEn = "person";
+                            $classIcon = "o-icon-user";
+                            break;
+                        case "団体":
+                            $classNameEn = "organization";
+                            $classIcon = "o-icon-building";
+                            break;
+                    }
+                ?>
+                <div class="result-card">
+                    <div class="card-image">
+                        <?php echo $item->linkRaw($this->thumbnail($item, 'square')); ?>
+                        <span class="card-type <?php echo $classNameEn; ?>"><i class="<?php echo $classIcon; ?>"></i> <?php echo $escape($className); ?></span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title"><?php echo $item->link($heading); ?></h3>
+                        
+                        <div class="card-meta">
+    			    <div class="publisher-info">
+                            <?php if ($item->value('ag:publisher')): ?>
+                            <?php echo $escape($item->value('ag:publisher')->valueResource()->displayTitle()); ?>
+        		    <?php endif; ?>
+        
+                            <?php if ($item->value('ag:distributor')): ?>
+            		    <?php if ($item->value('ag:publisher')): ?> & <?php endif; ?>
+            		    <?php echo $escape($item->value('ag:distributor')->valueResource()->displayTitle()); ?>
+        		    <?php endif; ?>
+    			</div>
+    
+    			    <?php if ($item->value('ag:datePublished')): ?>
+        		        <div class="date-info">
+            		            <?php echo $escape($item->value('ag:datePublished')); ?>
+        		        </div>
+    			    <?php endif; ?>
+			</div>
+    
+                        <div class="card-tags">
+                            <?php foreach ($item->value('ag:gameType', ['all' => true]) as $value): ?>
+                                <span class="card-tag"><?php echo $escape($value); ?></span>
+                            <?php endforeach; ?>
+                            
+                            <?php if ($item->value('ag:numberOfPlayers')): 
+                                $numberOfPlayers = $item->value('ag:numberOfPlayers');
+                                $numberOfPlayers = preg_replace('/–$/', '人–', $numberOfPlayers);
+                                if (preg_match('/\d$/', $numberOfPlayers)) {
+                                    $numberOfPlayers .= '人';
+                                }
+                            ?>
+                                <span class="card-tag"><?php echo $escape($numberOfPlayers); ?></span>
+                            <?php endif; ?>
+                            
+                            <?php if ($item->value('ag:playTime')):
+                                $target = array("PT","H","M","S");
+                                $replaced = array("","時間","分","秒");
+                                $playTime = $item->value('ag:playTime');
+                                $playTime = str_replace($target, $replaced, $playTime);
+                            ?>
+                                <span class="card-tag"><?php echo $escape($playTime); ?></span>
+                            <?php endif; ?>
+                            
+                            <?php if ($item->value('ag:audience')):
+                                $audience = $item->value('ag:audience');
+                                $audience = preg_replace('/–$/', '歳–', $audience);
+                                if (preg_match('/\d$/', $audience)) {
+                                    $audience .= '歳';
+                                }
+                            ?>
+                                <span class="card-tag"><?php echo $escape($audience); ?></span>
+                            <?php endif; ?>
+                            
+                            <?php if ($item->value('ag:designer')): ?>
+                                <span class="card-tag"><?php echo $escape($item->value('ag:designer')->valueResource()->displayTitle()); ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <?php echo ($itemSetShow) ? '</div>' : ''; ?>
+            <?php $this->trigger('view.browse.after'); ?>
+            
+            <!-- ページネーション -->
+            <div class="pagination">
+                <?php echo $this->pagination(); ?>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+/* メインレイアウト */
+.main-content {
+    display: flex;
+    gap: 20px;
+}
+
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.results-container {
+    flex-grow: 1;
+}
+
+/* フィルターセクション */
+.filter-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.filter-toggle {
+    background: none;
+    border: none;
+    color: #0066cc;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+/* 結果統計 */
+.result-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.result-sort {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-label {
+    font-size: 0.9em;
+}
+
+.view-toggle {
+    display: flex;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.view-button {
+    background: none;
+    border: none;
+    padding: 5px 8px;
+    cursor: pointer;
+}
+
+.view-button.active {
+    background-color: #f0f0f0;
+}
+
+/* グリッドビュー */
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.result-grid.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* カードスタイル */
+.result-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+}
+
+.result-card:hover {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* リストビュー */
+.list-view .result-card {
+    display: flex;
+    align-items: flex-start;
+}
+
+.list-view .card-image {
+    width: 150px;
+    flex-shrink: 0;
+}
+
+.list-view .card-content {
+    flex-grow: 1;
+    padding: 10px 15px;
+}
+
+/* カード画像 */
+.card-image {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-width: 200px;
+    max-height: 200px;
+    margin: 0 auto;
+    display: block;
+}
+
+.card-type {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 0.75em;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+/* カードコンテンツ */
+.card-content {
+    padding: 15px;
+}
+
+.card-title {
+    margin: 0 0 8px 0;
+    font-size: 1.1em;
+    line-height: 1.3;
+}
+
+.card-meta {
+    color: #666;
+    font-size: 0.85em;
+    margin-bottom: 10px;
+}
+
+.card-desc {
+    font-size: 0.9em;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    color: #333;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.card-tag {
+    background-color: #f0f0f0;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.75em;
+    color: #444;
+}
+
+/* リソースタイプによる色分け */
+.card-type.tabletopgame {
+    background-color: rgba(76, 175, 80, 0.8);
+}
+
+.card-type.person {
+    background-color: rgba(33, 150, 243, 0.8);
+}
+
+.card-type.organization {
+    background-color: rgba(156, 39, 176, 0.8);
+}
+
+/* ページネーション */
+.pagination {
+    margin-top: 30px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+    }
+    
+    .result-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+    
+    .list-view .result-card {
+        flex-direction: column;
+    }
+    
+    .list-view .card-image {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ビュー切り替え
+    const gridViewBtn = document.getElementById('grid-view');
+    const listViewBtn = document.getElementById('list-view');
+    const resultGrid = document.querySelector('.result-grid');
+    
+    if (gridViewBtn && listViewBtn && resultGrid) {
+        gridViewBtn.addEventListener('click', function() {
+            resultGrid.classList.remove('list-view');
+            resultGrid.classList.add('grid-view');
+            gridViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+            localStorage.setItem('agm-view-preference', 'grid');
+        });
+        
+        listViewBtn.addEventListener('click', function() {
+            resultGrid.classList.remove('grid-view');
+            resultGrid.classList.add('list-view');
+            listViewBtn.classList.add('active');
+            gridViewBtn.classList.remove('active');
+            localStorage.setItem('agm-view-preference', 'list');
+        });
+        
+        // 保存された設定を読み込む
+        const savedView = localStorage.getItem('agm-view-preference');
+        if (savedView === 'list') {
+            listViewBtn.click();
+        } else {
+            gridViewBtn.click();
+        }
+    }
+    
+    // フィルタークリア
+    window.clearAllFilters = function() {
+        const currentUrl = new URL(window.location.href);
+        const baseUrl = currentUrl.pathname;
+        window.location.href = baseUrl;
+    };
+});
+</script>

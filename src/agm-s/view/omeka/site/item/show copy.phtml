@@ -1,0 +1,165 @@
+<?php
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'item resource show');
+
+// ゲームタイトル取得
+$gameTitle = $item->displayTitle();
+
+// headのtitleタグにゲームタイトルを反映
+$this->headTitle($gameTitle);
+
+// タイプ情報
+$className = $item->resourceClass() ? $item->resourceClass()->label() : '';
+$classNameEn = '';
+$classIcon = '';
+switch($className) {
+    case 'テーブルトップゲーム':
+        $classNameEn = 'tabletopgame';
+        $classIcon = 'o-icon-chess-rook';
+        break;
+    case '冊子':
+    case '図書':
+        $classNameEn = 'book';
+        $classIcon = 'o-icon-book';
+        break;
+    case '個人':
+        $classNameEn = 'person';
+        $classIcon = 'o-icon-user';
+        break;
+    case '団体':
+        $classNameEn = 'organization';
+        $classIcon = 'o-icon-building';
+        break;
+    case '個別資料':
+        $classNameEn = 'ownedItem';
+        $classIcon = 'o-icon-note-sticky';
+        break;
+}
+
+// 参照元リソース取得
+$referencedBy = $item->value('dcterms:isReferencedBy', ['all' => true]);
+?>
+
+<h2>アイテム詳細</h2>
+
+<?php $thumbnail = $this->thumbnail($item, 'large'); ?>
+<div class="property-wrapper<?= $thumbnail ? '' : ' no-thumbnail'; ?>">
+    <?php if ($thumbnail): ?>
+        <div class="thumbnail">
+            <?= $thumbnail; ?>
+        </div>
+    <?php endif; ?>
+    <div class="content-info">
+        <?php if ($className): ?>
+            <div class="item-type-badge <?= $classNameEn; ?>">
+                <i class="<?= $classIcon; ?>"></i>
+                <?= $escape($className); ?>
+            </div>
+        <?php endif; ?>
+        
+        <h1><?= $escape($gameTitle); ?></h1>
+        
+        <div class="creator-issued-info">
+            <?php if ($item->value('ag:datePublished')): ?>
+                <div class="info-item">
+                    <i class="fas fa-calendar"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:datePublished', ['all' => true]) as $date): ?>
+                            <span class="date-published"><?= $escape($date); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($item->value('ag:responsibilityStatement')): ?>
+                <div class="info-item">
+                    <i class="o-icon-users"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:responsibilityStatement', ['all' => true]) as $responsibility): ?>
+                            <span class="responsibility"><?= $escape($responsibility); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($item->value('ag:publisher')): ?>
+                <div class="info-item">
+                    <i class="fas fa-warehouse"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:publisher', ['all' => true]) as $publisher): ?>
+                            <span class="publisher"><?= $publisher->valueResource()->displayTitle(); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<?php
+// このアイテムを参照するag:Itemを取得（ag:exemplarOfプロパティで参照）
+$referencingItems = [];
+$api = $this->api();
+$items = $api->search('items', [
+    'property' => [
+        [
+            'property' => 'ag:exemplarOf',
+            'type' => 'res',
+            'text' => $item->id()
+        ]
+    ]
+])->getContent();
+
+if (!empty($items)) {
+    foreach ($items as $referencingItem) {
+        $identifier = $referencingItem->value('ag:identifier');
+        if ($identifier) {
+            $referencingItems[] = [
+                'item' => $referencingItem,
+                'identifier' => $identifier
+            ];
+        }
+    }
+}
+?>
+
+<?php if (!empty($referencingItems)): ?>
+    <div class="referencing-items-section">
+        <div class="referencing-items-grid">
+            <?php foreach ($referencingItems as $refItem): ?>
+                <div class="referencing-item-card">
+                    <div class="card-header">
+                        <i class="o-icon-note-sticky"></i>
+                        <span class="item-type">個別資料</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="identifier">
+                            <span class="label">識別子:</span>
+                            <a href="<?= $escape($refItem['item']->url()); ?>">
+                                <?= $escape($refItem['identifier']); ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php echo $item->displayValues(); ?>
+
+<?php if (!empty($referencedBy)): ?>
+    <h3>このリソースを参照している資料</h3>
+    <ul>
+        <?php foreach ($referencedBy as $ref): ?>
+            <li>
+                <?php if ($ref->valueResource()): ?>
+                    <a href="<?= $escape($ref->valueResource()->url()); ?>">
+                        <?= $escape($ref->valueResource()->displayTitle()); ?>
+                    </a>
+                <?php else: ?>
+                    <?= $escape($ref->asHtml()); ?>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>

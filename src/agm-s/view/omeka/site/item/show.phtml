@@ -1,0 +1,470 @@
+<?php
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'item resource show');
+
+// Universal Viewerのアセットはモジュールが自動で読み込む
+
+// ゲームタイトル取得
+$gameTitle = $item->displayTitle();
+
+// headのtitleタグにゲームタイトルを反映
+$this->headTitle($gameTitle);
+
+// タイプ情報
+$className = $item->resourceClass() ? $item->resourceClass()->label() : '';
+$classNameEn = '';
+$classIcon = '';
+switch($className) {
+    case 'テーブルトップゲーム':
+        $classNameEn = 'tabletopgame';
+        $classIcon = 'o-icon-chess-rook';
+        break;
+    case '冊子':
+    case '図書':
+        $classNameEn = 'book';
+        $classIcon = 'o-icon-book';
+        break;
+    case '個人':
+        $classNameEn = 'person';
+        $classIcon = 'o-icon-user';
+        break;
+    case '団体':
+        $classNameEn = 'organization';
+        $classIcon = 'o-icon-building';
+        break;
+    case '個別資料':
+        $classNameEn = 'ownedItem';
+        $classIcon = 'o-icon-note-sticky';
+        break;
+}
+
+// 参照元リソース取得
+$referencedBy = $item->value('dcterms:isReferencedBy', ['all' => true]);
+
+// メインで表示しないプロパティ
+$hiddenProperties = [
+    'dcterms:title',
+    'ag:responsibilityStatement', 
+    'ag:datePublished',
+    'ag:numberOfPlayers',
+    'ag:playTime',
+    'ag:audience'
+];
+?>
+
+<h2>アイテム詳細</h2>
+
+<?php $thumbnail = $this->thumbnail($item, 'large'); ?>
+<div class="property-wrapper<?= $thumbnail ? '' : ' no-thumbnail'; ?>">
+    <?php if ($thumbnail): ?>
+        <div class="thumbnail">
+            <?= $thumbnail; ?>
+        </div>
+    <?php endif; ?>
+    <div class="content-info">
+        <?php if ($className): ?>
+            <div class="item-type-badge <?= $classNameEn; ?>">
+                <i class="<?= $classIcon; ?>"></i>
+                <?= $escape($className); ?>
+            </div>
+        <?php endif; ?>
+        
+        <h1><?= $escape($gameTitle); ?></h1>
+        
+        <div class="creator-issued-info">
+            <?php if ($item->value('ag:datePublished')): ?>
+                <div class="info-item">
+                    <i class="fas fa-calendar"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:datePublished', ['all' => true]) as $date): ?>
+                            <span class="date-published"><?= $escape($date); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($item->value('ag:responsibilityStatement')): ?>
+                <div class="info-item">
+                    <i class="fas fa-user"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:responsibilityStatement', ['all' => true]) as $responsibility): ?>
+                            <span class="responsibility"><?= $escape($responsibility); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($item->value('ag:publisher')): ?>
+                <div class="info-item">
+                    <i class="fas fa-warehouse"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:publisher', ['all' => true]) as $publisher): ?>
+                            <span class="publisher"><?= $publisher->valueResource()->displayTitle(); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($item->value('ag:numberOfPlayers')): ?>
+                <div class="info-item">
+                    <i class="fas fa-users"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:numberOfPlayers', ['all' => true]) as $players): ?>
+                            <?php 
+                            // プレイヤー数の表示形式を変換（例: "3–5" → "3〜5名"）
+                            $displayPlayers = $players;
+                            // 文字列置換でENDASHとハイフンを統一してから処理
+                            $normalizedPlayers = str_replace(['–', '-'], '|', $players);
+                            if (preg_match('/^(\d+)\|(\d+)$/', $normalizedPlayers, $matches)) {
+                                $displayPlayers = $matches[1] . '〜' . $matches[2] . '名';
+                            } elseif (preg_match('/^(\d+)$/', $players, $matches)) {
+                                $displayPlayers = $matches[1] . '名';
+                            }
+                            ?>
+                            <span class="number-of-players"><?= $escape($displayPlayers); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($item->value('ag:playTime')): ?>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:playTime', ['all' => true]) as $playTime): ?>
+                            <?php 
+                            // プレイ時間の表示形式を変換（時間、分、秒に対応）
+                            $displayPlayTime = $playTime;
+                            
+                            // 文字列置換でENDASHとハイフンを統一してから処理
+                            $normalizedPlayTime = str_replace(['–', '-'], '|', $playTime);
+                            
+                            // ISO8601 Duration形式の処理（時間、分、秒の組み合わせに対応）
+                            if (preg_match('/PT(\d+)H(\d+)M\|PT(\d+)H(\d+)M/', $normalizedPlayTime, $matches)) {
+                                // 時間と分の範囲（例: "PT1H30M-PT2H15M"）
+                                $minTotal = ($matches[1] * 60) + $matches[2];
+                                $maxTotal = ($matches[3] * 60) + $matches[4];
+                                $displayPlayTime = $minTotal . '〜' . $maxTotal . '分';
+                            } elseif (preg_match('/PT(\d+)H\|PT(\d+)H/', $normalizedPlayTime, $matches)) {
+                                // 時間のみの範囲（例: "PT1H-PT2H"）
+                                $minHours = $matches[1] * 60;
+                                $maxHours = $matches[2] * 60;
+                                $displayPlayTime = $minHours . '〜' . $maxHours . '分';
+                            } elseif (preg_match('/PT(\d+)M\|PT(\d+)M/', $normalizedPlayTime, $matches)) {
+                                // 分のみの範囲（例: "PT15M-PT20M"）
+                                $displayPlayTime = $matches[1] . '〜' . $matches[2] . '分';
+                            } elseif (preg_match('/PT(\d+)S\|PT(\d+)S/', $normalizedPlayTime, $matches)) {
+                                // 秒のみの範囲（例: "PT30S-PT60S"）
+                                $displayPlayTime = $matches[1] . '〜' . $matches[2] . '秒';
+                            } elseif (preg_match('/PT(\d+)H(\d+)M(\d+)S\|PT(\d+)H(\d+)M(\d+)S/', $normalizedPlayTime, $matches)) {
+                                // 時間、分、秒の範囲（例: "PT1H30M45S-PT2H15M30S"）
+                                $minTotal = ($matches[1] * 3600) + ($matches[2] * 60) + $matches[3];
+                                $maxTotal = ($matches[4] * 3600) + ($matches[5] * 60) + $matches[6];
+                                if ($minTotal >= 60) {
+                                    $displayPlayTime = floor($minTotal / 60) . '〜' . floor($maxTotal / 60) . '分';
+                                } else {
+                                    $displayPlayTime = $minTotal . '〜' . $maxTotal . '秒';
+                                }
+                            } elseif (preg_match('/PT(\d+)H(\d+)M/', $playTime, $matches)) {
+                                // 時間と分（例: "PT1H30M"）
+                                $totalMinutes = ($matches[1] * 60) + $matches[2];
+                                $displayPlayTime = $totalMinutes . '分';
+                            } elseif (preg_match('/PT(\d+)H/', $playTime, $matches)) {
+                                // 時間のみ（例: "PT1H"）
+                                $totalMinutes = $matches[1] * 60;
+                                $displayPlayTime = $totalMinutes . '分';
+                            } elseif (preg_match('/PT(\d+)M/', $playTime, $matches)) {
+                                // 分のみ（例: "PT30M"）
+                                $displayPlayTime = $matches[1] . '分';
+                            } elseif (preg_match('/PT(\d+)S/', $playTime, $matches)) {
+                                // 秒のみ（例: "PT45S"）
+                                $displayPlayTime = $matches[1] . '秒';
+                            }
+                            // 既に日本語形式の場合はそのまま
+                            elseif (preg_match('/^(\d+)時間\|(\d+)時間$/', $normalizedPlayTime, $matches)) {
+                                $displayPlayTime = ($matches[1] * 60) . '〜' . ($matches[2] * 60) . '分';
+                            } elseif (preg_match('/^(\d+)分\|(\d+)分$/', $normalizedPlayTime, $matches)) {
+                                $displayPlayTime = $matches[1] . '〜' . $matches[2] . '分';
+                            } elseif (preg_match('/^(\d+)秒\|(\d+)秒$/', $normalizedPlayTime, $matches)) {
+                                $displayPlayTime = $matches[1] . '〜' . $matches[2] . '秒';
+                            } elseif (preg_match('/^(\d+)時間$/', $playTime, $matches)) {
+                                $displayPlayTime = ($matches[1] * 60) . '分';
+                            } elseif (preg_match('/^(\d+)分$/', $playTime, $matches)) {
+                                $displayPlayTime = $matches[1] . '分';
+                            } elseif (preg_match('/^(\d+)秒$/', $playTime, $matches)) {
+                                $displayPlayTime = $matches[1] . '秒';
+                            }
+                            // その他の形式の場合は元の値をそのまま使用
+                            ?>
+                            <span class="play-time"><?= $escape($displayPlayTime); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($item->value('ag:audience')): ?>
+                <div class="info-item">
+                    <i class="fas fa-child"></i>
+                    <div class="info-content">
+                        <?php foreach ($item->value('ag:audience', ['all' => true]) as $audience): ?>
+                            <?php 
+                            // 対象者の表示形式を変換（例: "20–" → "20歳〜"）
+                            $displayAudience = $audience;
+                            // 文字列置換でENDASHとハイフンを統一してから処理
+                            $normalizedAudience = str_replace(['–', '-'], '|', $audience);
+                            if (preg_match('/^(\d+)\|$/', $normalizedAudience, $matches)) {
+                                $displayAudience = $matches[1] . '歳〜';
+                            } elseif (preg_match('/^(\d+)$/', $audience, $matches)) {
+                                $displayAudience = $matches[1] . '歳';
+                            }
+                            ?>
+                            <span class="audience"><?= $escape($displayAudience); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<?php
+// リソースタイプに応じた逆検索
+$referencingItems = [];
+$referencingResources = [];
+$api = $this->api();
+
+// リソースクラスを取得
+$resourceClass = $item->resourceClass();
+$resourceClassName = $resourceClass ? $resourceClass->localName() : '';
+
+// ag:TableTopGame, rcgs:Book, ag:Volumeの場合
+if (in_array($resourceClassName, ['TableTopGame', 'Book', 'Volume'])) {
+    $items = $api->search('items', [
+        'property' => [
+            [
+                'property' => 'ag:exemplarOf',
+                'type' => 'res',
+                'text' => $item->id()
+            ]
+        ]
+    ])->getContent();
+
+    if (!empty($items)) {
+        foreach ($items as $referencingItem) {
+            $identifier = $referencingItem->value('ag:identifier');
+            if ($identifier) {
+                $referencingItems[] = [
+                    'item' => $referencingItem,
+                    'identifier' => $identifier
+                ];
+            }
+        }
+    }
+}
+// ag:Person, ag:Organizationの場合
+elseif (in_array($resourceClassName, ['Person', 'Organization'])) {
+    $properties = [
+        'ag:publisher' => '出版',
+        'ag:distributor' => '頒布',
+        'ag:designer' => 'デザイン',
+        'ag:illustrator' => 'イラスト'
+    ];
+    
+    foreach ($properties as $property => $label) {
+        $resources = $api->search('items', [
+            'property' => [
+                [
+                    'property' => $property,
+                    'type' => 'res',
+                    'text' => $item->id()
+                ]
+            ]
+        ])->getContent();
+        
+        if (!empty($resources)) {
+            $referencingResources[$property] = [
+                'label' => $label,
+                'resources' => $resources
+            ];
+        }
+    }
+}
+?>
+
+<?php if (!empty($referencingItems)): ?>
+    <div class="referencing-items-section">
+        <div class="referencing-items-grid">
+            <?php foreach ($referencingItems as $refItem): ?>
+                <div class="referencing-item-card">
+                    <div class="card-header">
+                        <i class="o-icon-note-sticky"></i>
+                        <span class="item-type">個別資料</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="identifier">
+                            <span class="label">識別子:</span>
+                            <a href="<?= $escape($refItem['item']->url()); ?>">
+                                <?= $escape($refItem['identifier']); ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($referencingResources)): ?>
+    <div class="referencing-resources-section">
+        <div class="referencing-resources-grid">
+            <?php foreach ($referencingResources as $property => $data): ?>
+                <?php foreach ($data['resources'] as $resource): ?>
+                    <div class="referencing-resource-card">
+                        <div class="card-header">
+                            <i class="o-icon-link"></i>
+                            <span class="item-type"><?= $escape($data['label']); ?></span>
+                        </div>
+                        <div class="card-content">
+                            <div class="resource-title">
+                                <a href="<?= $escape($resource->url()); ?>">
+                                    <?= $escape($resource->value('rdfs:label') ?: $resource->displayTitle()); ?>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php 
+// リソーステンプレートからプロパティ順序を取得
+$resourceTemplate = $item->resourceTemplate();
+$orderedProperties = [];
+
+if ($resourceTemplate) {
+    // リソーステンプレートで定義されているプロパティを順序付きで取得
+    foreach ($resourceTemplate->resourceTemplateProperties() as $templateProperty) {
+        $property = $templateProperty->property();
+        if ($property) {
+            $orderedProperties[] = $property->term();
+        }
+    }
+}
+
+// アイテムのすべてのプロパティを取得
+$allProperties = $item->values();
+
+// プロパティを表示（リソーステンプレート順 + その他のプロパティ）
+$displayedProperties = [];
+
+// まずリソーステンプレートで定義されているプロパティを順序付きで処理
+foreach ($orderedProperties as $propertyTerm) {
+    if (isset($allProperties[$propertyTerm]) && !in_array($propertyTerm, $hiddenProperties)) {
+        $displayedProperties[$propertyTerm] = $allProperties[$propertyTerm];
+    }
+}
+
+// 次にリソーステンプレートに含まれていないプロパティを処理
+foreach ($allProperties as $propertyTerm => $propertyValues) {
+    if (!in_array($propertyTerm, $orderedProperties) && !in_array($propertyTerm, $hiddenProperties)) {
+        $displayedProperties[$propertyTerm] = $propertyValues;
+    }
+}
+
+// プロパティを表示
+if (!empty($displayedProperties)) {
+    echo '<div class="item-properties-section">';
+    foreach ($displayedProperties as $propertyTerm => $propertyValues) {
+        $property = $this->api()->searchOne('properties', ['term' => $propertyTerm])->getContent();
+        if ($property) {
+            echo '<div class="property">';
+            echo '<h4 class="property-label">' . $escape($property->label()) . '</h4>';
+            echo '<div class="property-value">';
+            foreach ($propertyValues['values'] as $value) {
+                echo '<div class="property-value-item">';
+                
+                // 言語タグがある場合は表示
+                $lang = $value->lang();
+                if ($lang) {
+                    echo '<span class="language-tag">' . $escape($lang) . '</span>';
+                }
+                
+                if ($value->valueResource()) {
+                    echo '<a href="' . $escape($value->valueResource()->url()) . '">';
+                    echo $escape($value->valueResource()->displayTitle());
+                    echo '</a>';
+                } else {
+                    // URI値の場合は適切にリンクとして表示
+                    $valueText = $value->value();
+                    $valueUri = $value->uri();
+                    
+                    if ($valueUri) {
+                        // URIが設定されている場合はリンクとして表示
+                        echo '<a href="' . $escape($valueUri) . '" target="_blank" rel="noopener noreferrer">';
+                        // テキストが空の場合はURIを表示
+                        $displayText = !empty($valueText) ? $valueText : $valueUri;
+                        echo $escape($displayText);
+                        echo '</a>';
+                    } else {
+                        // 通常のテキスト値
+                        echo $escape($valueText);
+                    }
+                }
+                echo '</div>';
+            }
+            echo '</div>';
+            echo '</div>';
+        }
+    }
+    echo '</div>';
+}
+?>
+
+<?php if (!empty($referencedBy)): ?>
+    <h3>このリソースを参照している資料</h3>
+    <ul>
+        <?php foreach ($referencedBy as $ref): ?>
+            <li>
+                <?php if ($ref->valueResource()): ?>
+                    <a href="<?= $escape($ref->valueResource()->url()); ?>">
+                        <?= $escape($ref->valueResource()->displayTitle()); ?>
+                    </a>
+                <?php else: ?>
+                    <?= $escape($ref->asHtml()); ?>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<?php
+// 個別資料の場合、ログインユーザーにのみUniversal Viewerを表示
+if ($classNameEn === 'ownedItem' && $this->identity()): ?>
+    <div class="universal-viewer-container">
+        <h3>デジタル画像ビューア</h3>
+        <?php
+        // IIIFマニフェストのURLを生成
+        $siteUrl = $this->serverUrl();
+        $iiifUrl = $siteUrl . '/iiif/2/' . $item->id() . '/manifest';
+        
+        // Universal ViewerのURLを生成（Omeka Sの標準パターン）
+        $uvUrl = $siteUrl . '/item/' . $item->id() . '/uv';
+        ?>
+        
+        <!-- Universal Viewerをiframeで表示 -->
+        <iframe 
+            src="<?= $escape($uvUrl); ?>" 
+            width="100%" 
+            height="600" 
+            frameborder="0" 
+            allowfullscreen
+            title="Universal Viewer">
+        </iframe>
+        
+        <!-- フォールバック: 直接マニフェストへのリンク -->
+        <div style="margin-top: 1rem; text-align: center;">
+            <a href="<?= $escape($uvUrl); ?>" target="_blank" class="btn">
+                <i class="fas fa-external-link-alt"></i>
+                ビューアを新しいタブで開く
+            </a>
+        </div>
+    </div>
+<?php endif; ?>

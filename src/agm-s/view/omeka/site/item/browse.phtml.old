@@ -1,0 +1,131 @@
+<?php
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'item resource browse');
+
+$query = $this->params()->fromQuery();
+$itemSetShow = isset($itemSet);
+if ($itemSetShow):
+    $this->htmlElement('body')->appendAttribute('class', 'item-set');
+    $query['item_set_id'] = $itemSet->id();
+endif;
+$sortHeadings = [
+    [
+        'label' => $translate('Title'),
+        'value' => 'dcterms:title'
+    ],
+    [
+        'label' => $translate('Class'),
+        'value' => 'resource_class_label'
+    ],
+    [
+        'label' => '公開日',
+        'value' => 'ag:datePublished'
+    ],
+    [
+        'label' => $translate('Created'),
+        'value' => 'created'
+    ],
+];
+?>
+<?php if ($itemSetShow): ?>
+    <?php echo $this->pageTitle($itemSet->displayTitle(), 2); ?>
+    <h3><?php echo $translate('Item set'); ?></h3>
+    <div class="metadata">
+        <?php echo $itemSet->displayValues(); ?>
+    </div>
+    <div class="item-set-items">
+    <?php echo '<h3>' . $escape($translate('Items')) . '</h3>'; ?>
+<?php else: ?>
+    <?php echo $this->pageTitle($translate('Items'), 2); ?>
+<?php endif; ?>
+
+<?php echo $this->searchFilters(); ?>
+
+<div class="browse-controls">
+    <?php echo $this->pagination(); ?>
+    <?php echo $this->hyperlink($translate('Advanced search'), $this->url('site/resource', ['controller' => 'item', 'action' => 'search'], ['query' => $query], true), ['class' => 'advanced-search']); ?>
+    <?php echo $this->sortSelector($sortHeadings); ?>
+</div>
+
+<?php $this->trigger('view.browse.before'); ?>
+<ul class="resource-list">
+<?php
+$headingTerm = $this->siteSetting('browse_heading_property_term');
+$bodyTerm = $this->siteSetting('browse_body_property_term');
+foreach ($items as $item):
+    $heading = $headingTerm ? $item->value($headingTerm, ['default' => $translate('[Untitled]')]) : $item->displayTitle();
+    $body = $bodyTerm ? $item->value($bodyTerm) : $item->displayDescription();
+?>
+    <li class="item resource">
+        <div class="thumb"><?php echo $item->linkRaw($this->thumbnail($item, 'medium')); ?></div>
+        <div class="resource_desc">
+            <?php $className = $item->resourceClass()->label() ?>
+            <?php switch($className){
+            case $className == "テーブルトップゲーム":
+                $classNameEn = "tabletopgame";
+                $classIcon = "o-icon-chess-rook";
+            break;
+            case $className == "冊子":
+                $classNameEn = "volume";
+                $classIcon = "o-icon-book";
+            break;
+            case $className == "個人":
+                $classNameEn = "person";
+                $classIcon = "o-icon-user";
+                break;
+            case $className == "団体":
+                $classNameEn = "organization";
+                $classIcon = "o-icon-building";
+                break;
+            };
+            ?>
+            <div class="resource_class <?= $classNameEn; ?>">
+                <i class="<?= $classIcon; ?>"></i><?= $className; ?>
+            </div>
+        <h4 class="<?= $classNameEn; ?>"><?php echo $item->link($heading); ?></h4>
+        <div class="resource_desc_col">        
+            <?php $sep=""; ?>
+            <?php foreach ($item->value('ag:gameType', ['all' => true]) as $value): ?><?= $sep.$value; $sep=", "; ?><?php endforeach; ?>
+        </div>
+        <div class="resource_desc_col">
+            <?php if ($item->value('ag:designer')): ?><span><?= $item->value('ag:designer')->valueResource()->displayTitle(); ?></span><?php endif; ?>
+            <?php if ($item->value('ag:publisher')): ?><span class="resource_desc_col_pub"><?= $item->value('ag:publisher')->valueResource()->displayTitle(); ?></span><?php endif; ?>
+            <?php if ($item->value('ag:distributor')): ?><span class="resource_desc_col_pub"><?php if ($item->value('ag:publisher') and $item->value('ag:distributor')):; echo "& "; endif; ?><?= $item->value('ag:distributor')->valueResource()->displayTitle(); ?></span><?php endif; ?>
+        </div>
+        <div class="resource_desc_col">
+            <?php
+                if ($item->value('ag:numberOfPlayers')):
+                $numberOfPlayers = $item->value('ag:numberOfPlayers');
+                $numberOfPlayers = preg_replace('/–$/', '人–', $numberOfPlayers);
+                if (preg_match('/\d$/', $numberOfPlayers)) {
+                    $numberOfPlayers .= '人';
+                }
+                ?>
+                <span><?php echo $numberOfPlayers ?></span>
+                <?php endif; ?><?php if ($item->value('ag:playTime')):; echo " ·"; endif; ?>
+                </span>
+            <?php $target = array("PT","H","M","S"); $replaced = array("","時間","分","秒"); ?>
+            <?php if ($item->value('ag:playTime')): ?><span><?php $playTime = $item->value('ag:playTime'); ?><?= str_replace($target,$replaced,$playTime) ?><?php if ($item->value('ag:audience')):; echo " ·"; endif; ?></span><?php endif; ?>
+            <?php
+                if ($item->value('ag:audience')):
+                $audience = $item->value('ag:audience');
+                $audience = preg_replace('/–$/', '歳–', $audience);
+                if (preg_match('/\d$/', $audience)) {
+                    $audience .= '歳';
+                }
+                ?>
+                <span><?php echo $audience ?></span>
+                <?php endif; ?>
+
+        </div>
+        </div>
+        <?php if ($body): ?>
+        <div class="date"><?php echo $escape($body); ?></div>
+        <?php endif; ?>
+    </li>
+<?php endforeach; ?>
+</ul>
+<?php echo ($itemSetShow) ? '</div>' : ''; ?>
+<?php $this->trigger('view.browse.after'); ?>
+<?php echo $this->pagination(); ?>

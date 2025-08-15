@@ -1,0 +1,185 @@
+<?php
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
+?>
+
+<div class="homepage-container">
+    <!-- お知らせ -->
+    <section class="update-section">
+        <h2 class="section-title">お知らせ</h2>
+        <div class="update-list">
+            <?php
+            // APIインスタンスを取得
+            $api = $this->api();
+            
+            // 更新情報ページから最新の更新内容を取得
+            try {
+                $updatePage = $api->search('site_pages', [
+                    'slug' => 'update',
+                    'site_id' => $this->site->id()
+                ])->getContent();
+                
+                if (!empty($updatePage)) {
+                    $page = $updatePage[0];
+                    $pageContent = $page->blocks();
+                    
+                    // 更新情報の構造を解析（新しい構造）
+                    // 例: <div class="article-update"><div class="date-and-header"><h3>2025-07-27</h3><h4>タイトル</h4></div><p>内容...</p></div>
+                    $content = '';
+                    foreach ($pageContent as $block) {
+                        $data = $block->data();
+                        if (isset($data['html'])) {
+                            $content .= $data['html'];
+                        }
+                    }
+                    
+                    // 新しい構造に合わせてパース
+                    if (preg_match_all('/<div class="article-update">\s*<div class="date-and-header">\s*<h3[^>]*>([^<]+)<\/h3>\s*<h4>([^<]+)<\/h4>\s*<\/div>/', $content, $matches, PREG_SET_ORDER)) {
+                        $updateCount = 0;
+                        $totalUpdates = count($matches);
+                        
+                        foreach ($matches as $match) {
+                            if ($updateCount >= 5) break; // 最新5件まで表示
+                            
+                            $date = $match[1];
+                            $title = $match[2];
+                            ?>
+                            <div class="update-item">
+                                <div class="update-date"><?php echo $escape($date); ?></div>
+                                <div class="update-title">
+                                    <a href="<?php echo $this->url('site/page', ['site-slug' => $this->site->slug(), 'page-slug' => 'update'], [], true); ?>#<?php echo urlencode($title); ?>">
+                                        <?php echo $escape($title); ?>
+                                    </a>
+                                </div>
+                            </div>
+                            <?php
+                            $updateCount++;
+                        }
+                        
+                        // 5件以上ある場合は「お知らせ一覧」リンクを表示
+                        if ($totalUpdates > 5) {
+                            ?>
+                            <div class="update-more-link">
+                                <a href="<?php echo $this->url('site/page', ['site-slug' => $this->site->slug(), 'page-slug' => 'update'], [], true); ?>">
+                                    お知らせ一覧 <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <?php
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                // エラーが発生した場合は何も表示しない
+            }
+            ?>
+        </div>
+    </section>
+
+    <!-- カテゴリ別アクセス -->
+    <section class="category-section">
+        <h2 class="section-title">カテゴリから探す</h2>
+        <div class="category-grid">
+            <div class="category-card tabletopgame">
+                <div class="category-icon">
+                    <i class="fas fa-chess-rook"></i>
+                </div>
+                <h3 class="category-title">テーブルトップゲーム</h3>
+                <p class="category-description">ボードゲーム、カードゲームなどパッケージ化されたゲーム</p>
+                <a href="<?php echo $this->url('site/resource', ['controller' => 'item', 'action' => 'browse'], ['query' => ['resource_class_id' => '108']], true); ?>" class="category-link">
+                    閲覧する <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="category-card book">
+                <div class="category-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3 class="category-title">冊子</h3>
+                <p class="category-description">書籍、雑誌やゲームブックなど冊子資料</p>
+                <a href="<?php echo $this->url('site/resource', ['controller' => 'item', 'action' => 'browse'], ['query' => ['resource_class_id' => '151']], true); ?>" class="category-link">
+                    閲覧する <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="category-card person">
+                <div class="category-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 class="category-title">個人</h3>
+                <p class="category-description">ゲームデザイナー、イラストレーターなどの人物</p>
+                <a href="<?php echo $this->url('site/resource', ['controller' => 'item', 'action' => 'browse'], ['query' => ['resource_class_id' => '139']], true); ?>" class="category-link">
+                    閲覧する <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="category-card organization">
+                <div class="category-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="category-title">団体</h3>
+                <p class="category-description">ゲーム出版者などの企業・サークル</p>
+                <a href="<?php echo $this->url('site/resource', ['controller' => 'item', 'action' => 'browse'], ['query' => ['resource_class_id' => '136']], true); ?>" class="category-link">
+                    閲覧する <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 統計情報 -->
+    <section class="stats-section">
+        <h2 class="section-title">コレクション統計</h2>
+        <p>アナログゲームミュージアムでは多様な資料を継続的に収集しています。ゲームマーケットの出展サンプルや寄贈、購入などで収集しています。</p>
+        <div class="stats-grid">
+            <?php
+            // 各カテゴリの統計を取得
+            $api = $this->api();
+            
+            // テーブルトップゲーム数
+            $tabletopGames = $api->search('items', ['resource_class_id' => '108'])->getTotalResults();
+            
+            // 冊子数
+            $volumes = $api->search('items', ['resource_class_id' => '151'])->getTotalResults();
+            
+            // 個人数
+            $persons = $api->search('items', ['resource_class_id' => '139'])->getTotalResults();
+            
+            // 団体数
+            $organizations = $api->search('items', ['resource_class_id' => '136'])->getTotalResults();
+
+            // 個別資料数
+            $items = $api->search('items', ['resource_class_id' => '128'])->getTotalResults();
+            ?>
+            
+            <div class="stat-card">
+                <div class="stat-number"><?php echo number_format($tabletopGames); ?></div>
+                <div class="stat-label">テーブルトップゲーム</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number"><?php echo number_format($volumes); ?></div>
+                <div class="stat-label">冊子</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number"><?php echo number_format($persons); ?></div>
+                <div class="stat-label">個人</div>
+            </div>
+            
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo number_format($organizations); ?></div>
+                    <div class="stat-label">団体</div>
+                </div>
+
+            <div class="stat-card">
+                <div class="stat-number"><?php echo number_format($items); ?></div>
+                <div class="stat-label">所蔵資料</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">5</div>
+                <div class="stat-label">空き棚の残り</div>
+            </div>
+        </div>
+    </section>
+
+</div> 

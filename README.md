@@ -25,7 +25,7 @@
 
 .
 ├── .github/          \# GitHubアクション等の設定
-├── docs/             \# プロジェクト全体の公式ドキュメント（Webサイト）
+├── docs/             \# プロジェクト全体の公式ドキュメント（[静的ページ](https://fukudakz.github.io/analoggamemuseum/)
 │   └── manuals/      \# マニュアル類
 ├── schemas/          \# メタデータスキーマの定義
 ├── conservation/     \# 保存環境に関する技術文書

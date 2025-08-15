@@ -45,6 +45,7 @@
 ├── discussion/       \# 議論の記録や議事録
 ├── examples/         \# スキーマやコードの具体例
 ├── .gitignore        \# Gitの追跡除外設定
+├── labels/           \# 所蔵品ID用ラベル
 ├── README.md         \# このファイル
 └── LICENSE           \# ライセンス
 

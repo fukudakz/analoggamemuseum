@@ -22,11 +22,13 @@
     - url メディアのソース
     - resourceID AGMサーチのリソースの内部ID
 
-    dcterms:title,url,itemID,resourceID
-    b624-001_work.webp,https://analoggamemuseum.org/temp/b624-001_work.webp,b624,3917
-    b621-001_work.webp,https://analoggamemuseum.org/temp/b621-001_work.webp,b621,3921
-    b620-001_work.webp,https://analoggamemuseum.org/temp/b620-001_work.webp,b620,3914
-
+```
+dcterms:title,url,itemID,resourceID
+b624-001_work.webp,https://analoggamemuseum.org/temp/b624-001_work.webp,b624,3917
+b621-001_work.webp,https://analoggamemuseum.org/temp/b621-001_work.webp,b621,3921
+b620-001_work.webp,https://analoggamemuseum.org/temp/b620-001_work.webp,b620,3914
+```
+[CSV Import 登録用サンプルファイル](https://github.com/fukudakz/analoggamemuseum/blob/main/docs/assets/files/import_bulk_images.csv)
 
 # Omeka Sへのインポート
 - モジュール「Bulk Import」を選択する
@@ -35,7 +37,6 @@
     - その他のオプションは該当のCSVの形式による
 - 以下の画像（Start importの設定）の通りの設定を入力し「Continue」を選択する
 - 次のページで「Start import」を選択する
-
 
 ![Start importの設定](https://paper-attachments.dropboxusercontent.com/s_FFFBA7AEB78B4CE5E928713954EB0886EE55D3FDBFC7C15283916AD7247176A2_1674397262393_Screenshot+2023-01-22+at+23-20-05+Start+import++Bulk+import++agm.png)
 

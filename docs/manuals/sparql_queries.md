@@ -1,0 +1,5 @@
+# SPARQLクエリ
+
+- [アイテムとインスタンスの対応表](https://collection.rcgs.jp/sparql/#query=PREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX%20ag%3A%20%3Chttps%3A%2F%2Fwww.analoggamemuseum.org%2Fontology%2F%3E%0APREFIX%20o%3A%20%3Chttp%3A%2F%2Fomeka.org%2Fs%2Fvocabs%2Fo%23%3E%0ASELECT%20%3FitemID%20%3FinstanceID%20WHERE%20%7B%0A%20%20%3Fsub%20a%20ag%3AItem%20%3B%0A%20%20ag%3Aidentifier%20%3FitemID%20%3B%0A%20%20ag%3AexemplarOf%20%3Finstance%20.%0A%20%20%3Finstance%20o%3Aid%20%3FinstanceID%20.%0A%7D&endpoint=https%3A%2F%2Fdydra.com%2Ffukudakz%2Fagmsearchendpoint%2Fsparql&requestMethod=POST&tabTitle=Query%201&headers=%7B%7D&contentTypeConstruct=text%2Fturtle%2C*%2F*%3Bq%3D0.9&contentTypeSelect=application%2Fsparql-results%2Bjson%2C*%2F*%3Bq%3D0.9&outputFormat=table)
+
+注記：RCGS SPARQLのYASGUIを用いてAGMのエンドポイントにアクセスするクエリです。
